@@ -3,12 +3,11 @@
 
 from client_sdk_python import Web3
 from common.connect import connect_web3
+import json
 from utils.platon_lib.ppos_wyq import Ppos
 from conf import  setting as conf
-from common.load_file import get_node_info
 import time
 from common import log
-
 from common.load_file import LoadFile, get_node_info
 
 node_yml_path = conf.PPOS_NODE_YML
@@ -22,10 +21,11 @@ address = Web3.toChecksumAddress(conf.ADDRESS)
 privatekey = conf.PRIVATE_KEY
 account_list = conf.account_list
 privatekey_list = conf.privatekey_list
-chainid = 101
 
+genesis_path = conf.GENESIS_TMP
+genesis_dict = LoadFile(genesis_path).get_data()
+chainid = int(genesis_dict["config"]["chainId"])
 
-ppos_noconsensus_1 = Ppos(rpc_list[0], account_list[0], chainid, privatekey=privatekey_list[0])
 
 
 config_json_path = conf.PLATON_CONFIG_PATH
@@ -40,11 +40,14 @@ Consensuswheel = (ExpectedMinutes * 60) // (Interval * PerRoundBlocks * Validato
 ConsensusSize = Consensuswheel * (Interval * PerRoundBlocks * ValidatorCount)
 
 
+StakeThreshold=1000000000000000000000000
+MinimumThreshold=10000000000000000000
 
 def getCandidateList():
     """
     获取实时验证人的nodeID list
     """
+    ppos_noconsensus_1 = Ppos(rpc_list[0], account_list[0], chainid, privatekey=privatekey_list[0])
     msg = ppos_noconsensus_1.getCandidateList()
     recive_list = msg.get("Data")
     nodeid_list = []
@@ -60,6 +63,7 @@ def getVerifierList():
     """
     查询当前结算周期的nodeID list
     """
+    ppos_noconsensus_1 = Ppos(rpc_list[0], account_list[0], chainid, privatekey=privatekey_list[0])
     msg = ppos_noconsensus_1.getVerifierList()
     recive_list = msg.get("Data")
     nodeid_list = []
@@ -75,6 +79,7 @@ def getValidatorList():
     """
     查询当前共识轮的nodeID list
     """
+    ppos_noconsensus_1 = Ppos(rpc_list[0], account_list[0], chainid, privatekey=privatekey_list[0])
     msg = ppos_noconsensus_1.getVerifierList()
     recive_list = msg.get("Data")
     nodeid_list = []
@@ -105,9 +110,20 @@ def get_block_number(w3,settlement=ConsensusSize):
         time.sleep(20)
         current_block_after = w3.eth.blockNumber
         if current_block_after == current_block:
+            log.info('区块不增长,块高：{}'.format(current_block_after))
             raise Exception('区块不增长,块高：{}'.format(current_block_after))
+
+
+def get_config_data(StakeThreshold=StakeThreshold, MinimumThreshold=MinimumThreshold):
+    with open(conf.PLATON_CONFIG_PATH, 'r', encoding='utf-8') as f:
+        res = json.loads(f.read())
+        res['EconomicModel']['Staking']['MinimumThreshold']= MinimumThreshold
+        res['EconomicModel']['Staking']['StakeThreshold'] = StakeThreshold
+    with open(conf.PLATON_CONFIG_PATH, 'w', encoding='utf-8') as b:
+        config_json = json.dumps(res)
+        b.write(config_json)
 
 
 
 # if __name__ == '__main__':
-#     getCandidateList()
+#     get_config_data()
