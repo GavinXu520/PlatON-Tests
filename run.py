@@ -56,6 +56,7 @@ def setup(node_yml=None, collusion_number=0):
     auto.check_node_yml(conf.NODE_YML)
     conf.NODE_NUMBER = collusion_number
     auto.start_all_node(conf.NODE_YML)
+    exit(1)
 
 
 def teardown():
