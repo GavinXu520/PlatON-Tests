@@ -102,6 +102,7 @@ GOVERN_NODE_YML = os.path.abspath(os.path.join(BASE_DIR, "deploy/node/govern_nod
 # mpclib
 MPCLIB = os.path.abspath(os.path.join(BASE_DIR, "deploy/rely/mpclib/mpclib.tar.gz"))
 
+BN_LIB = os.path.abspath(os.path.join(BASE_DIR, "deploy/rely/bn/bn.tar.gz"))
 # 用例根目录
 CASE = os.path.abspath(os.path.join(BASE_DIR, "case"))
 

@@ -829,25 +829,6 @@ class TestLockeDpositionConfig:
         assert dict_Info['debt'] == Web3.toWei(
             500, 'ether'), "欠释放锁仓金额：{} 有误".format(dict_Info['debt'])
 
-    def testss(self):
-        url = CommonMethod.link_list(self)
-        platon_ppos = Ppos(url, self.address, self.chainid)
-        while 1:
-            block = platon_ppos.eth.blockNumber
-            print(block)
-        # Balance = platon_ppos.eth.getBalance('0x8E6b51f6D28A9e92726186Fb3D1720A31b098694')
-        # print(Balance)
-        # platon_ppos1 = connect_web3 ('http://192.168.10.225:6789')
-        # result = platon_ppos1.isConnected()
-        # print(result)
-        # result1 = platon_ppos.getCandidateInfo ('2c34d6cd119e3b77b43aecdcfd653cacbd6b3b3c387a0d227e4d71b36a6a71b6111ecc953e329015fb1bc06961819609ffd5f73b63a179f27893e9e2da1e8ca1')
-        # print("验证人信息：",result1)
-        # result2= platon_ppos.getVerifierList()
-        # result = platon_ppos.getValidatorList()
-        # print("当前验证人列表",result2)
-        # print("当前共识列表",result)
-
-
 if __name__ == '__main__':
     a = TestLockeDpositionConfig()
     #a.start_init()

@@ -71,12 +71,15 @@ def generate_init_node(collusion_list):
     static_nodes = []
     nodeid_list = []
     for nodedict in collusion_list:
+        node_obj = {}
         public_value = r"enode://" + \
                        nodedict["id"] + "@" + \
                        nodedict["host"] + ":" + \
                        str(nodedict.get("port", 16789))
+        node_obj["node"] = public_value
+        node_obj["blsPubKey"] = nodedict["blspubkey"]
         static_nodes.append(public_value)
-        nodeid_list.append(public_value)
+        nodeid_list.append(node_obj)
     return static_nodes, nodeid_list
 
 
@@ -264,6 +267,28 @@ class BaseDeploy:
         remote_nodekey_path = '{}/node-{}/data/nodekey'.format(
             self.deploy_path, port)
         sftp.put(nodekey_file, remote_nodekey_path)
+
+    def upload_blskey(self, ssh, sftp, blskey, ip, port):
+        """
+        上传nodekey
+        :param ssh:
+        :param sftp:
+        :param nodekey:
+        :param ip:
+        :param port:
+        :return:
+        """
+        blskey_dir = gen_node_tmp(conf.NODEKEY, str(ip), str(port))
+        if not os.path.exists(blskey_dir):
+            os.makedirs(blskey_dir)
+        blskey_file = os.path.join(blskey_dir, "blskey")
+        with open(blskey_file, 'w', encoding="utf-8") as f:
+            f.write(blskey)
+        self.run_ssh(
+            ssh, 'mkdir -p {}/node-{}/data/'.format(self.deploy_path, port))
+        remote_blskey_path = '{}/node-{}/data/blskey'.format(
+            self.deploy_path, port)
+        sftp.put(blskey_file, remote_blskey_path)
 
     def upload_keystore(self, ssh, sftp, port):
         """
@@ -480,7 +505,7 @@ class BaseDeploy:
         """
         run_thread(node_list, self.install_dependency, conf.MPCLIB)
 
-    def install_dependency(self, nodedict, file=conf.MPCLIB):
+    def install_dependency(self, nodedict, file=conf.MPCLIB,bn_file=conf.BN_LIB):
         """
         配置服务器依赖
         :param nodedict:
@@ -500,29 +525,41 @@ class BaseDeploy:
                      nodedict["password"])
         pwd_list = self.run_ssh(ssh, "pwd")
         pwd = pwd_list[0].strip("\r\n")
-        cmd = r"sudo -S -p '' sed -i '$a export LD_LIBRARY_PATH={}/mpclib' /etc/profile".format(
+        is_have_bn = self.run_ssh(ssh, 'ls|grep "bn"')
+        cmd = r"sudo -S -p '' sed -i '$a /usr/local/lib' /etc/ld.so.conf".format(
             pwd)
-        is_have_mpclib = self.run_ssh(ssh, 'ls|grep "mpclib"')
+        if not is_have_bn:
+            self.run_ssh(ssh, "sudo -S -p '' apt install make", nodedict["password"])
+            sftp.put(bn_file, os.path.basename(bn_file))
+            self.run_ssh(ssh, "tar -zxvf ./{}".format(os.path.basename(bn_file)))
+            self.run_ssh(ssh, "cd bn;make")
+            self.run_ssh(ssh, "cd bn;sudo -S -p '' make install", nodedict["password"])
+                # self.run_ssh(ssh, "rm -rf ./{}".format(os.path.basename(file)))
+            self.run_ssh(ssh, cmd, nodedict["password"])
+            self.run_ssh(ssh, "sudo -S -p '' ldconfig", nodedict["password"])
+        # cmd = r"sudo -S -p '' sed -i '$a export LD_LIBRARY_PATH={}/mpclib' /etc/profile".format(
+        #     pwd)
+        # is_have_mpclib = self.run_ssh(ssh, 'ls|grep "mpclib"')
 
         # self.run_ssh(
         #     ssh,
         #     "sudo -S -p '' apt-get install libgmpxx4ldbl libgmp-dev libprocps4-dev",
         #     nodedict["password"])
 
-        if not is_have_mpclib:
-            sftp.put(file, os.path.basename(file))
-            self.run_ssh(ssh, "tar -zxvf ./{}".format(os.path.basename(file)))
-            self.run_ssh(ssh, "mv ./platon-mpc-ubuntu-amd64-0.5.0/ ./mpclib")
-            self.run_ssh(ssh, cmd, nodedict["password"])
-            self.run_ssh(ssh, "rm -rf ./{}".format(os.path.basename(file)))
-            # self.run_ssh(
-            #     ssh, "sudo -S -p '' apt-get install libboost-all-dev -y", nodedict["password"])
-            # self.run_ssh(
-            #     ssh, "sudo -S -p '' apt-get install llvm-6.0-dev llvm-6.0 libclang-6.0-dev -y", nodedict["password"])
-            self.run_ssh(
-                ssh,
-                "sudo -S -p '' apt-get install libgmpxx4ldbl libgmp-dev libprocps4-dev",
-                nodedict["password"])
+        # if not is_have_mpclib:
+        #     sftp.put(file, os.path.basename(file))
+        #     self.run_ssh(ssh, "tar -zxvf ./{}".format(os.path.basename(file)))
+        #     self.run_ssh(ssh, "mv ./platon-mpc-ubuntu-amd64-0.5.0/ ./mpclib")
+        #     self.run_ssh(ssh, cmd, nodedict["password"])
+        #     self.run_ssh(ssh, "rm -rf ./{}".format(os.path.basename(file)))
+        #     # self.run_ssh(
+        #     #     ssh, "sudo -S -p '' apt-get install libboost-all-dev -y", nodedict["password"])
+        #     # self.run_ssh(
+        #     #     ssh, "sudo -S -p '' apt-get install llvm-6.0-dev llvm-6.0 libclang-6.0-dev -y", nodedict["password"])
+        #     self.run_ssh(
+        #         ssh,
+        #         "sudo -S -p '' apt-get install libgmpxx4ldbl libgmp-dev libprocps4-dev",
+        #         nodedict["password"])
         t.close()
         lock.release()
 
@@ -752,6 +789,8 @@ class BaseDeploy:
             if static_node_file:
                 self.upload_static_json(sftp, port, static_node_file)
         nodekey = nodedict["nodekey"]
+        blskey = nodedict["blsprikey"]
+        self.upload_blskey(ssh, sftp, blskey, ip, port)
         self.upload_nodekey(ssh, sftp, nodekey, ip, port)
         self.upload_keystore(ssh, sftp, port)
         self.start(ssh,
@@ -939,11 +978,15 @@ class AutoDeployPlaton(BaseDeploy):
                     node["path"] + \
                     "{}/{}/data/nodekey".format(self.deploy_path, node_name)
                 cmd = cmd + " --config {}/{}/config.json".format (self.deploy_path, node_name)
+                cmd = cmd + " --cbft.blskey " + node["path"] + \
+                    "{}/{}/data/blskey".format(self.deploy_path, node_name)
             else:
                 cmd = cmd + " --gcmode archive --nodekey " + \
                     "{}/{}/{}/data/nodekey".format(pwd,
                                                    self.deploy_path, node_name)
                 cmd = cmd + " --config {}/{}/{}/config.json".format (pwd,self.deploy_path, node_name)
+                cmd = cmd + " --cbft.blskey "+"{}/{}/{}/data/blskey".format(pwd,
+                                                   self.deploy_path, node_name)
             #cmd = cmd + " --pprof --pprofaddr 0.0.0.0 --pprofport 6060"
             fp.write("command=" + cmd + "\n")
             fp.write("environment=LD_LIBRARY_PATH={}/mpclib\n".format(pwd))
@@ -1039,7 +1082,7 @@ class AutoDeployPlaton(BaseDeploy):
             self.clean_blockchain(ssh, port, password)
         self.clean_log(ssh, port)
         self.upload_platon(ssh, sftp, port)
-        self.upload_config_json (sftp, port, self.config)
+        self.upload_config_json(sftp, port, self.config)
         if is_init:
             if genesis_file is None:
                 raise Exception("需要初始化时，genesis_file不能为空")
@@ -1049,6 +1092,8 @@ class AutoDeployPlaton(BaseDeploy):
             if static_node_file:
                 self.upload_static_json(sftp, port, static_node_file)
         nodekey = node["nodekey"]
+        blskey = node["blsprikey"]
+        self.upload_blskey(ssh, sftp, blskey, ip, port)
         self.upload_nodekey(ssh, sftp, nodekey, ip, port)
         self.upload_keystore(ssh, sftp, port)
         self.start_node_conf(ssh, sftp, port, node, node_name)
@@ -1191,6 +1236,8 @@ class AutoDeployPlaton(BaseDeploy):
         self.clean_log(ssh, port)
         self.upload_platon(ssh, sftp, port)
         nodekey = node["nodekey"]
+        blskey = node["blsprikey"]
+        self.upload_blskey(ssh, sftp, blskey, ip, port)
         self.upload_nodekey(ssh, sftp, nodekey, ip, port)
         self.upload_keystore(ssh, sftp, port)
         self.start_node_conf(ssh, sftp, port, node, node_name)
