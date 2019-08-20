@@ -44,7 +44,7 @@ def run(version=None, module=None, case=None):
     else:
         raise Exception("请传入需要测试的用例、版本或模块")
     report = time.strftime("%Y-%m-%d_%H%M%S", time.localtime())
-    excute_cases = r"-s -v -m 'P1'--disable-warnings {} --alluredir={} --junitxml={}".format(
+    excute_cases = r"-s -v -m 'P0 or P1'--disable-warnings {} --alluredir={} --junitxml={}".format(
         case, abspath("./report/allure/{}".format(report)),abspath("./report/junitxml/{}.xml".format(report)))
     pytest.main(excute_cases)
 
