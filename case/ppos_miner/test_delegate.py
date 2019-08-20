@@ -21,7 +21,7 @@ from client_sdk_python.personal import (
 )
 from hexbytes import HexBytes
 from client_sdk_python.eth import Eth
-
+from utils.platon_lib.ppos_tool import get_config_data
 
 
 class TestDelegate():
@@ -43,9 +43,10 @@ class TestDelegate():
     programVersion = 1792
     illegal_nodeID = conf.illegal_nodeID
     genesis_path = conf.GENESIS_TMP
-    genesis_dict = LoadFile(genesis_path).get_data()
-    chainid = int(genesis_dict["config"]["chainId"])
 
+
+    """替换config.json"""
+    get_config_data()
     config_json_path = conf.PLATON_CONFIG_PATH
     config_dict = LoadFile(config_json_path).get_data()
     amount_delegate = Web3.fromWei(
@@ -57,6 +58,8 @@ class TestDelegate():
     def setup_class(self):
         self.auto = AutoDeployPlaton()
         self.auto.start_all_node(self.node_yml_path)
+        self.genesis_dict = LoadFile(self.genesis_path).get_data()
+        self.chainid = int(self.genesis_dict["config"]["chainId"])
         self.ppos_link = Ppos(
             self.rpc_list[0],self.address,self.chainid)
         self.w3_list = [connect_web3(url) for url in self.rpc_list]
