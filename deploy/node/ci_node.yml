@@ -2,21 +2,55 @@ collusion:
 - host: 192.168.9.160
   username: juzhen
   password: Platon123!
+  sshport: 22
+  port: 16789
+  rpcport: 6789
+  id: 1ba87e61bb3de579a4897da95ae1a2db63204fcb6a5a65c2b827021e4e1dbf7f7fb1793c1f80440200982ef4f48b2da5859bfdc45a875e06ff26e32a1fae0a4c
+  nodekey: 8171dc4f86a13aef6cc24003cb8928982fe2a921c1cec9317eec8542c46c2755
+  url: http://192.168.9.160:6789
 - host: 192.168.9.161
   username: juzhen
   password: Platon123!
+  sshport: 22
+  port: 16789
+  rpcport: 6789
+  id: c6ac3a858df00ccca074cac686782f4616297e42f25f583b352029a64fe2d7999f110860306a59333b22f054e6ab34b453805f08ce8bf757b270522dd281a1f9
+  nodekey: 35affe80bec3671b8f51db37125e88431f28adb8ac938277f48cc4438448f094
+  url: http://192.168.9.161:6789
 - host: 192.168.9.162
   username: juzhen
   password: Platon123!
+  sshport: 22
+  port: 16789
+  rpcport: 6789
+  id: 73b63e9bdc11308c427673f8948ec843ebb75fabdfc0b4c4a6b20fd3bc6c73ca609496d5f115081add09822175fd369b343d5f58be8b460d7309ea77d3bf7282
+  nodekey: c3406e0dd1e3f5d8bab47c14f009946ed18b457b04ad67cf9baafd0f85aeea6e
+  url: http://192.168.9.162:6789
+- host: 192.168.9.162
+  username: juzhen
+  password: Platon123!
+  sshport: 22
+  port: 16790
+  rpcport: 6790
+  id: 28d2c1e4d67b54fc7f9fcdd9151ae8f5a8fbc76868fa7a9ee1af6c298f89b87b159a6c8345bc713dbce8e67c08ece3eaabdaa5b4c3a8792abeabbeb0a264e3a5
+  nodekey: ae2b86006d5b44b3bf34010107dadc2e1899dc61b612daa661955e408343ed5b
+  url: http://192.168.9.162:6790
+nocollusion:
 - host: 192.168.9.163
   username: juzhen
   password: Platon123!
-
-
-nocollusion:
-- host: 192.168.120.164
+  sshport: 22
+  port: 16789
+  rpcport: 6789
+  id: 4168ea6d5c98c0b9c8db80ddfa70004ef949706f2351dbdf5c7c82b1a4cbf55d7ead40d837afd1d33b034be184168c674fbe15068b797cc084d430acbad4afa7
+  nodekey: 4bccfb8d03668193d7033e6eef34ce74654e629c2ea904a8955057353ee0daaa
+  url: http://192.168.9.163:6789
+- host: 192.168.9.163
   username: juzhen
   password: Platon123!
-- host: 192.168.120.165
-  username: juzhen
-  password: Platon123!
+  sshport: 22
+  port: 16790
+  rpcport: 6790
+  id: b386debd71f485397bf187baedb65ef37f624526f787e60bff89744fd4eb46c0af43f16f35cb193259b6b6a56582c25e724ca7040c5b4177265e3ed811a93717
+  nodekey: 260575bae4c98bd2332d2ee0167332741093893804506c4977c3952616fe908c
+  url: http://192.168.9.163:6790

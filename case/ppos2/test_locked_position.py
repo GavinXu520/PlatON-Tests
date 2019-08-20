@@ -22,7 +22,7 @@ class TestLockeDposition:
     pwd = conf.PASSWORD
     abi = conf.DPOS_CONTRACT_ABI
     cbft_json_path = conf.CBFT2
-    node_yml_path = conf.PPOS_NODE_TEST_YML
+    node_yml_path = conf.NODE_YML
     file = conf.CASE_DICT
     privatekey = conf.PRIVATE_KEY
     base_gas_price = 60000000000000
@@ -40,9 +40,10 @@ class TestLockeDposition:
                       'INCENTIVEPOOL': 45000000000000000000000000,
                       'DEVELOPERS': 5000000000000000000000000
                       }
-
-    def start_init(self):
+                      
+    def setup_class(self):
         #修改config参数
+
         CommonMethod.update_config(self,'EconomicModel','Common','ExpectedMinutes',3)
         CommonMethod.update_config(self,'EconomicModel','Common','PerRoundBlocks',10)
         CommonMethod.update_config(self,'EconomicModel','Common','ValidatorCount',5)
@@ -51,7 +52,7 @@ class TestLockeDposition:
         #启动节点
         self.auto = AutoDeployPlaton ()
         self.auto.start_all_node (self.node_yml_path)
-
+        
 
     @allure.title ("查看初始化时锁仓余额和锁仓信息")
     def test_init_loukup(self):
@@ -60,6 +61,7 @@ class TestLockeDposition:
         以及查询初始锁仓计划信息的有效性
         :return:
         '''
+
         url = CommonMethod.link_list (self)
         platon_ppos = Ppos (url, self.address, self.chainid)
         lockupbalance = platon_ppos.eth.getBalance (conf.FOUNDATIONLOCKUPADDRESS)

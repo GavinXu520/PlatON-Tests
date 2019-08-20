@@ -25,7 +25,7 @@ class TestLockeDpositionConfig:
     pwd = conf.PASSWORD
     abi = conf.DPOS_CONTRACT_ABI
     cbft_json_path = conf.CBFT2
-    node_yml_path = conf.PPOS_NODE_TEST_YML
+    node_yml_path = conf.NODE_YML
     file = conf.CASE_DICT
     privatekey = conf.PRIVATE_KEY
     base_gas_price = 60000000000000
@@ -43,7 +43,7 @@ class TestLockeDpositionConfig:
                       'INCENTIVEPOOL': 45000000000000000000000000,
                       'DEVELOPERS': 5000000000000000000000000
                       }
-    def start_init(self):
+    def setup_class(self):
         #修改config参数
         CommonMethod.update_config(self,'EconomicModel','Common','ExpectedMinutes',3)
         CommonMethod.update_config(self,'EconomicModel','Common','PerRoundBlocks',10)

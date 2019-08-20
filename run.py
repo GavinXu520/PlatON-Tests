@@ -44,7 +44,7 @@ def run(version=None, module=None, case=None):
     else:
         raise Exception("请传入需要测试的用例、版本或模块")
     report = time.strftime("%Y-%m-%d_%H%M%S", time.localtime())
-    excute_cases = r"-s -v --disable-warnings {} --alluredir={} --junitxml={}".format(
+    excute_cases = r"-s -v -m 'P1'--disable-warnings {} --alluredir={} --junitxml={}".format(
         case, abspath("./report/allure/{}".format(report)),abspath("./report/junitxml/{}.xml".format(report)))
     pytest.main(excute_cases)
 
@@ -55,12 +55,12 @@ def setup(node_yml=None, collusion_number=0):
     auto = AutoDeployPlaton()
     auto.check_node_yml(conf.NODE_YML)
     conf.NODE_NUMBER = collusion_number
-    # auto.start_all_node(conf.NODE_YML)
+    auto.start_all_node(conf.NODE_YML)
 
 
 def teardown():
     auto = AutoDeployPlaton()
-    # auto.kill_of_yaml(conf.NODE_YML)
+    auto.kill_of_yaml(conf.NODE_YML)
 
 
 if __name__ == "__main__":
@@ -71,6 +71,7 @@ if __name__ == "__main__":
     url = opt.url
     if url:
         download_platon(download_url=url)
+
     setup(node_yml, 0)
     version = opt.type
     module = opt.module
