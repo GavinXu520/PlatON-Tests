@@ -48,9 +48,9 @@ class TestAddstaking():
     illegal_nodeID = conf.illegal_nodeID
 
     genesis_path = conf.GENESIS_TMP
-    genesis_dict = LoadFile(genesis_path).get_data()
-    chainid = int(genesis_dict["config"]["chainId"])
 
+    """替换config.json"""
+    get_config_data()
     config_json_path = conf.PLATON_CONFIG_PATH
     config_dict = LoadFile(config_json_path).get_data()
     amount_delegate = Web3.fromWei(
@@ -59,9 +59,12 @@ class TestAddstaking():
         int(config_dict['EconomicModel']['Staking']['StakeThreshold']), 'ether')
 
 
+
     def setup_class(self):
         self.auto = AutoDeployPlaton()
         self.auto.start_all_node(self.node_yml_path)
+        self.genesis_dict = LoadFile(self.genesis_path).get_data()
+        self.chainid = int(self.genesis_dict["config"]["chainId"])
         self.ppos_link = Ppos(
             self.rpc_list[0],self.address,self.chainid)
         self.ppos_link1 = Ppos(
@@ -75,6 +78,7 @@ class TestAddstaking():
         self.ppos_noconsensus_5 = Ppos(self.rpc_list[0], self.account_list[4],self.chainid,privatekey=self.privatekey_list[4])
         self.ppos_noconsensus_6 = Ppos(self.rpc_list[0], self.account_list[5],self.chainid,privatekey=self.privatekey_list[5])
         self.eth = Eth(self.w3_list[0])
+
 
     def transaction(self,w3, from_address, to_address=None,value=1000000000000000000000000000000000,
                     gas=91000000, gasPrice=9000000000,pwd ="88888888"):
